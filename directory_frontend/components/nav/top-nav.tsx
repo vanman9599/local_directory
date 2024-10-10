@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { LayoutDashboard, Plus, LogIn, Layout } from 'lucide-react';
 import { currentUser } from '@clerk/nextjs/server';
 import { Toaster } from 'react-hot-toast';
+import AddBusinessButton from '@/components/buttons/add-business-button'; 
 
 export default async function TopNav() {
   const user = await currentUser();
@@ -25,16 +26,14 @@ export default async function TopNav() {
         <Link href="/">
            <Image src="/logoipsum-225.svg" alt="logo" width={50} height={50} className="hover-cursor-pointer"/>
         </Link>
-       
-        </MenubarMenu>
-    </div>
+      
+       </MenubarMenu>
+       </div>
+       <div className="flex flex-grow items-center justify-end gap-1">
+        <AddBusinessButton />
+        
 
-    <div className="flex flex-grow items-center justify-end gap-1">
-    <MenubarMenu>
-          <MenubarTrigger className="text-base font-normal">
-              <Link href="/business/add"><span className="flex items-center"><Plus className='mr-2' size={16} /><span>Add Business</span></span></Link>
-          </MenubarTrigger>
-        </MenubarMenu>
+  
         {user && (
           <MenubarMenu>
           <MenubarTrigger className="text-base font-normal">

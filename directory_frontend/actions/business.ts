@@ -18,7 +18,28 @@ export const saveBusinessToDB = async(data: BusinessState)=>{
     return JSON.parse(JSON.stringify(business));
   }catch(err: any){
    
-    throw new Error(err)
+    console.error(err)
   }
 
+  }
+
+  export const getUserBusinessesFromDB = async()=>{
+    try{
+      await db();
+      const user = await currentUser();
+      const userEmail = user?.emailAddresses[0]?.emailAddress
+      const businesses = (await Business.find({userEmail}));
+      return JSON.parse(JSON.stringify(businesses));
+    }catch(err: any){
+      throw new Error(err)
+    }
+  }
+  export const getBusinessFromDB = async(_id: string)=>{
+    try{
+      await db();
+      const business = (await Business.findById(_id));
+      return JSON.parse(JSON.stringify(business));
+    }catch(err: any){
+      throw new Error(err)
+    }
   }
