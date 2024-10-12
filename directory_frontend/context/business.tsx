@@ -4,8 +4,8 @@ import {useClerk, useUser} from '@clerk/nextjs'
 import { saveBusinessToDB, getBusinessFromDB, getUserBusinessesFromDB } from '@/actions/business';
 import toast from 'react-hot-toast';
 import { useRouter, usePathname, useParams } from 'next/navigation';
-
-
+import {handleLogoAction} from '@/actions/cloudinary';
+import { aiGenerateBusinessDescription} from '@/actions/AI';
 interface BusinessState {
   _id: string;
   userEmail: string;
@@ -54,6 +54,9 @@ interface BusinessContextType{
   setBusinesses: React.Dispatch<React.SetStateAction<BusinessState[]>>;
   businesses: BusinessState[];
   initialState: BusinessState;
+  logoUploading: boolean;
+  generateBusinessDescription: () => void;
+  generateDescriptionLoading: boolean;
 
 }
 const BusinessContext = createContext<BusinessContextType | undefined>(undefined);
@@ -64,12 +67,13 @@ const pathname = usePathname();
 const [business, setBusiness] = useState<BusinessState>(initialState);
 const [loading, setLoading]= useState<boolean>(false);
 const [businesses, setBusinesses] = useState<BusinessState[]>([]);
+const [logoUploading, setLogoUploading] = useState<boolean>(false);
 const isDashboard = pathname === "/dashboard";
 const {openSignIn} = useClerk();
 const {isSignedIn} = useUser();
 const router = useRouter();
 const { _id } = useParams();
-
+const  [generateDescriptionLoading, setGenerateDescriptionLoading]  = useState<boolean>(false);
 useEffect(()=>{
   const savedBusiness = localStorage.getItem("business");
   if(savedBusiness){
@@ -89,14 +93,54 @@ useEffect(()=>{
   }
 },[_id])
 
-const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>{
-  const {name,value} = e.target;
-  setBusiness((prevBusiness: BusinessState)=>{
-    const updatedBusiness = {...prevBusiness, [name]: value}
-    
-    //save to local storage
-    localStorage.setItem("business", JSON.stringify(updatedBusiness))
-    return updatedBusiness
+const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) =>{
+  const {name,value,files} = e.target;
+  if(name=== "logo" && files && files[0]){
+    await handleLogo(files, name);
+  }else{
+    setBusiness((prevBusiness: BusinessState)=>{
+      const updatedBusiness = {...prevBusiness, [name]: value}
+      
+      //save to local storage
+      localStorage.setItem("business", JSON.stringify(updatedBusiness))
+      return updatedBusiness
+    })
+  }
+ 
+};
+const handleLogo = async(files: FileList, name: string)=>{
+  const file = files[0];
+  setLogoUploading(true);
+  const reader = new FileReader()
+  return new Promise<void>((resolve, reject)=>{
+    reader.onloadend = async()=>{
+      const base64Image = reader.result as string;
+      try {
+        const imageUrl = await handleLogoAction(base64Image); 
+        if(imageUrl){
+          setBusiness((prevBusiness)=>{
+            const updatedBusiness = {...prevBusiness, [name]: imageUrl}
+            localStorage.setItem("business", JSON.stringify(updatedBusiness))
+            return updatedBusiness;
+          })
+          resolve();
+        }else{
+          toast.error("Failed to upload logo. exit 1")
+          
+        }
+      } catch(err:any){
+        console.error(err);
+        toast.error("Failed to upload logo. exit 2");
+      }finally{
+        setLogoUploading(false);
+        
+      }
+    }
+    reader.onerror = (error)=>{
+      toast.error("Failed to upload image");
+      reject(error);
+    }
+    reader.readAsDataURL(file);
   })
 }
  const handleSubmit = async (e: React.FormEvent)=>{
@@ -142,6 +186,27 @@ const getBusiness = async ()=>{
     toast.error("Failed to fetch business")
    }
 }
+const generateBusinessDescription = async () => {
+  setGenerateDescriptionLoading(true);
+
+  const { createdAt, updatedAt, __v, ...businessForAI } = business;
+  business.description = '';
+  try {
+    const description = await aiGenerateBusinessDescription(businessForAI);
+    setBusiness((prevBusiness: BusinessState) => {
+      const updatedBusiness = { ...prevBusiness, description };
+      localStorage.setItem('business', JSON.stringify(updatedBusiness));
+      return updatedBusiness; // Return the updated state
+    });
+    toast.success('Description generated successfully by AI');
+  } catch (err) {
+    console.error(err);
+    toast.error('Failed to generate description');
+    // Handle error
+  } finally {
+    setGenerateDescriptionLoading(false);
+  }
+};
 return(
     <BusinessContext.Provider value={{
       business,
@@ -153,6 +218,9 @@ return(
       setBusinesses,
       businesses, 
       initialState,
+      logoUploading,
+      generateBusinessDescription,
+      generateDescriptionLoading
       }}>
       {children}
     </BusinessContext.Provider>

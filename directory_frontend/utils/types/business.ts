@@ -13,7 +13,7 @@ export interface BusinessState {
     abn: string;
     slug: string;
     published?: boolean;
-    createdAt: string;
-    updatedAt: string;
-    __v: number
+    createdAt?: string;
+    updatedAt?: string;
+    __v?: number
 }

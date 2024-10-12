@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { BusinessState } from '@/utils/types/business';
 import PreviewCard from '@/components/business/preview/preview-card';
-import { Loader2Icon,Send } from 'lucide-react';
+import { Loader2Icon,Send, Brain } from 'lucide-react';
+
 interface InputField{
   name: string;
   type: string;
@@ -73,7 +74,7 @@ accept: 'image/*',
 
 ]
 export default function BusinessForm() {
-  const {business, handleChange, handleSubmit, loading} = useBusiness();
+  const {business, handleChange, handleSubmit, loading, logoUploading, generateBusinessDescription, generateDescriptionLoading} = useBusiness();
   
   return (
     <div className="flex flex-col lg:flex-row h-screen">
@@ -91,16 +92,23 @@ export default function BusinessForm() {
                  type={item.type}
                  required={item.required}
                  onChange={handleChange}
-                 value={(business[item.name as keyof BusinessState] || '') as
-                  | string
-                  | number
-                 }
+                 value={item.name === 'logo' ? "": ((business[item.name as keyof BusinessState] || "")as string | number )}
+                 accept={item.accept}
                  />
+                 {logoUploading && item.name==="logo" && ( <div className="absolute inset-0 flex items-center justify-center bg-opacity-50 bg-white"><Loader2Icon size={32} className="animate-spin" /></div>)}
         </div>
       ))}
-      <Button type="submit" 
-       className="my-5" onClick={handleSubmit}>      {loading ? <Loader2Icon className='animate-spin mr-2'/> : <Send className='mr-2'/>}{" "}Submit</Button>
+      <div className='flex justify-between items-cener w-full'>
+      <Button  variant="destructive" type="submit" disabled={
+          !business?.name || !business?.category || generateDescriptionLoading}
+        className="my-5" onClick={generateBusinessDescription}>      {generateDescriptionLoading ? <Brain className='animate-spin mr-2'/> : <Send className='mr-2'/>}{" "}Generate Description with AI</Button>
       
+        <Button type="submit" 
+        className="my-5" onClick={handleSubmit} disabled={
+          !business?.name || !business?.category 
+        }>      {loading ? <Loader2Icon className='animate-spin mr-2'/> : <Send className='mr-2'/>}{" "}Submit</Button>
+      </div>
+     
       </div>
 
     </div>
