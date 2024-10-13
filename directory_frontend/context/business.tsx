@@ -1,7 +1,11 @@
 'use client';
 import React, {createContext,useEffect, useContext, useState, ReactNode} from 'react';
 import {useClerk, useUser} from '@clerk/nextjs'
-import { saveBusinessToDB, getBusinessFromDB, getUserBusinessesFromDB } from '@/actions/business';
+import { saveBusinessToDB,
+   getBusinessFromDB,
+   getUserBusinessesFromDB, 
+   updateBusinssInDB,
+  } from '@/actions/business';
 import toast from 'react-hot-toast';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import {handleLogoAction} from '@/actions/cloudinary';
@@ -57,29 +61,32 @@ interface BusinessContextType{
   logoUploading: boolean;
   generateBusinessDescription: () => void;
   generateDescriptionLoading: boolean;
+  updateBusiness: () => void;
+  isEditPage: boolean;
 
 }
 const BusinessContext = createContext<BusinessContextType | undefined>(undefined);
 
 export const BusinessProvider: React.FC<{children: ReactNode}> = ({children}) => {
- 
-const pathname = usePathname();
-const [business, setBusiness] = useState<BusinessState>(initialState);
-const [loading, setLoading]= useState<boolean>(false);
-const [businesses, setBusinesses] = useState<BusinessState[]>([]);
-const [logoUploading, setLogoUploading] = useState<boolean>(false);
-const isDashboard = pathname === "/dashboard";
-const {openSignIn} = useClerk();
-const {isSignedIn} = useUser();
-const router = useRouter();
-const { _id } = useParams();
-const  [generateDescriptionLoading, setGenerateDescriptionLoading]  = useState<boolean>(false);
-useEffect(()=>{
-  const savedBusiness = localStorage.getItem("business");
-  if(savedBusiness){
-    setBusiness(JSON.parse(savedBusiness))
-  }
-},[])
+  const pathname = usePathname();
+  const [business, setBusiness] = useState<BusinessState>(initialState);
+  const [loading, setLoading]= useState<boolean>(false);
+  const [businesses, setBusinesses] = useState<BusinessState[]>([]);
+  const [logoUploading, setLogoUploading] = useState<boolean>(false);
+  const isDashboard = pathname === "/dashboard";
+  const isEditPage = pathname.includes("/edit");
+  const {openSignIn} = useClerk();
+  const {isSignedIn} = useUser();
+  const router = useRouter();
+  const { _id } = useParams();
+  const  [generateDescriptionLoading, setGenerateDescriptionLoading]  = useState<boolean>(false);
+  const {openDescriptionModal, setOpenDescriptionModal} = useState<boolean>(false);
+  useEffect(()=>{
+    const savedBusiness = localStorage.getItem("business");
+    if(savedBusiness){
+      setBusiness(JSON.parse(savedBusiness))
+    }
+  },[])
 
 useEffect(()=>{
   if(isDashboard){
@@ -207,25 +214,45 @@ const generateBusinessDescription = async () => {
     setGenerateDescriptionLoading(false);
   }
 };
-return(
-    <BusinessContext.Provider value={{
+const updateBusiness = async () => {
+  setLoading(true);
+  try {
+    const updatedBusiness = await updateBusinssInDB(business);
+    setBusiness(updatedBusiness);
+    toast.success("Business updated successfully");
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to update business");
+  } finally {
+    setLoading(false);
+  }
+};
+
+return (
+  <BusinessContext.Provider
+    value={{
       business,
       setBusiness,
       loading,
-      setLoading, 
+      setLoading,
       handleChange,
       handleSubmit,
       setBusinesses,
-      businesses, 
+      businesses,
       initialState,
       logoUploading,
       generateBusinessDescription,
-      generateDescriptionLoading
-      }}>
-      {children}
-    </BusinessContext.Provider>
-  )
-}
+      generateDescriptionLoading,
+      updateBusiness,
+      isEditPage,
+      openDescriptionModal,
+      setOpenDescriptionModal,
+    }}
+  >
+    {children}
+  </BusinessContext.Provider>
+  );
+};
 
 export const useBusiness = () =>{
   const context = useContext(BusinessContext);

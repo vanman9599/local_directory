@@ -43,3 +43,13 @@ export const saveBusinessToDB = async(data: BusinessState)=>{
       throw new Error(err)
     }
   }
+   export const updateBusinssInDB = async(data: BusinessState)=>{
+    try{
+      await db();
+      const {_id, ...rest} = data;
+       const business = await Business.findByIdAndUpdate(_id,rest, {new: true})
+      return JSON.parse(JSON.stringify(business));
+    }catch(err: any){
+      throw new Error(err)
+    }
+   }

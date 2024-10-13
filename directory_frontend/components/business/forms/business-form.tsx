@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { BusinessState } from '@/utils/types/business';
 import PreviewCard from '@/components/business/preview/preview-card';
 import { Loader2Icon,Send, Brain } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 interface InputField{
   name: string;
@@ -74,8 +75,9 @@ accept: 'image/*',
 
 ]
 export default function BusinessForm() {
-  const {business, handleChange, handleSubmit, loading, logoUploading, generateBusinessDescription, generateDescriptionLoading} = useBusiness();
+  const {business, handleChange, handleSubmit, loading, logoUploading, generateBusinessDescription, generateDescriptionLoading, updateBusiness, isEditPage} = useBusiness();
   
+  ;
   return (
     <div className="flex flex-col lg:flex-row h-screen">
       <div className='flex flex-col lg:w-1/2 p-4 lg:order-last lg:flex lg:justify-center lg:items-center overflow-y-auto min-h-[354px]'>
@@ -104,8 +106,8 @@ export default function BusinessForm() {
         className="my-5" onClick={generateBusinessDescription}>      {generateDescriptionLoading ? <Brain className='animate-spin mr-2'/> : <Send className='mr-2'/>}{" "}Generate Description with AI</Button>
       
         <Button type="submit" 
-        className="my-5" onClick={handleSubmit} disabled={
-          !business?.name || !business?.category 
+        className="my-5" onClick={isEditPage ? updateBusiness: handleSubmit} disabled={
+          !business?.name || !business?.category || !business?.address || loading || generateDescriptionLoading
         }>      {loading ? <Loader2Icon className='animate-spin mr-2'/> : <Send className='mr-2'/>}{" "}Submit</Button>
       </div>
      
