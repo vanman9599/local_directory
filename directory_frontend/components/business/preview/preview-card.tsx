@@ -4,8 +4,12 @@ import { BusinessState } from '@/utils/types/business';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {MapPin, Phone, Mail, Globe, Clock} from 'lucide-react';
 import Image from 'next/image';
+import { useBusiness } from '@/context/business';
+import DescriptonModal from '@/components/modals/description-modal';
+
 
 export default function PreviewCard({business}: {business: BusinessState}) {
+  const { openDescriptionModal, setOpenDescriptionModal, isDashboard } = useBusiness();
   return( 
   <Card className="w-full max-w-2xl mx-auto" style={{height: '354px'}}>
     <CardHeader className="flex flex-row items-center space-x-4 pd-2">
@@ -30,7 +34,7 @@ export default function PreviewCard({business}: {business: BusinessState}) {
         </div>
     </CardHeader>
     <CardContent>
-      <p className="text-sm mb-4 line-clamp-3">
+      <p onClick={()=> !isDashboard && setOpenDescriptionModal(!openDescriptionModal)} className="text-sm mb-4 line-clamp-3">
         {business?.description || "AI powered description goes here"} 
       </p>
       <div className="space-y-2">
@@ -41,6 +45,7 @@ export default function PreviewCard({business}: {business: BusinessState}) {
         <InfoItem icon={Clock} text={business?.hours || "Hours"} />
       </div>
     </CardContent>
+    <DescriptonModal  />
   </Card>
   )
 }

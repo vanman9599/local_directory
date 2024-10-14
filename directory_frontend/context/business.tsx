@@ -63,6 +63,9 @@ interface BusinessContextType{
   generateDescriptionLoading: boolean;
   updateBusiness: () => void;
   isEditPage: boolean;
+  openDescriptionModal: boolean;
+  setOpenDescriptionModal: React.Dispatch<React.SetStateAction<boolean>>;
+  isDashboard: boolean;
 
 }
 const BusinessContext = createContext<BusinessContextType | undefined>(undefined);
@@ -80,7 +83,7 @@ export const BusinessProvider: React.FC<{children: ReactNode}> = ({children}) =>
   const router = useRouter();
   const { _id } = useParams();
   const  [generateDescriptionLoading, setGenerateDescriptionLoading]  = useState<boolean>(false);
-  const {openDescriptionModal, setOpenDescriptionModal} = useState<boolean>(false);
+  const [openDescriptionModal, setOpenDescriptionModal] = useState<boolean>(false);
   useEffect(()=>{
     const savedBusiness = localStorage.getItem("business");
     if(savedBusiness){
@@ -247,6 +250,7 @@ return (
       isEditPage,
       openDescriptionModal,
       setOpenDescriptionModal,
+      isDashboard
     }}
   >
     {children}
