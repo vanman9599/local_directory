@@ -107,8 +107,8 @@ export default function BusinessForm() {
       
         <Button type="submit" 
         className="my-5" onClick={isEditPage ? updateBusiness: handleSubmit} disabled={
-          !business?.name || !business?.category || !business?.address || loading || generateDescriptionLoading
-        }>      {loading ? <Loader2Icon className='animate-spin mr-2'/> : <Send className='mr-2'/>}{" "}Submit</Button>
+          !business?.name || !business?.category || !business?.address || generateDescriptionLoading
+        }>      <Send className='mr-2'/>Save</Button>
       </div>
      
       </div>

@@ -34,9 +34,9 @@ export default function PreviewCard({business}: {business: BusinessState}) {
         </div>
     </CardHeader>
     <CardContent>
-      <p onClick={()=> !isDashboard && setOpenDescriptionModal(!openDescriptionModal)} className="text-sm mb-4 line-clamp-3">
-        {business?.description || "AI powered description goes here"} 
-      </p>
+      <div className="cursor-pointer text-sm mb-4 line-clamp-3" onClick={()=> !isDashboard && setOpenDescriptionModal(!openDescriptionModal)}>
+        {business?.description ? <div dangerouslySetInnerHTML={{__html: business.description}} /> : "AI powered description goes here"} 
+      </div>
       <div className="space-y-2">
         <InfoItem icon={MapPin} text={business?.address || "Address"} />
         <InfoItem icon={Phone} text={business?.phone || "Phone"} />
