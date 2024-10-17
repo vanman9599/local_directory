@@ -9,7 +9,10 @@ import DescriptonModal from '@/components/modals/description-modal';
 
 
 export default function PreviewCard({business}: {business: BusinessState}) {
-  const { openDescriptionModal, setOpenDescriptionModal, isDashboard } = useBusiness();
+  const { openDescriptionModal,
+     setOpenDescriptionModal,
+      isDashboard, 
+    togglePulished } = useBusiness();
   return( 
   <Card className="w-full max-w-2xl mx-auto" style={{height: '354px'}}>
     <CardHeader className="flex flex-row items-center space-x-4 pd-2">

@@ -5,6 +5,7 @@ import { saveBusinessToDB,
    getBusinessFromDB,
    getUserBusinessesFromDB, 
    updateBusinssInDB,
+   togglePublishInDB,
   } from '@/actions/business';
 import toast from 'react-hot-toast';
 import { useRouter, usePathname, useParams } from 'next/navigation';
@@ -66,6 +67,8 @@ interface BusinessContextType{
   openDescriptionModal: boolean;
   setOpenDescriptionModal: React.Dispatch<React.SetStateAction<boolean>>;
   isDashboard: boolean;
+  togglePublished: () => void;
+ 
 
 }
 const BusinessContext = createContext<BusinessContextType | undefined>(undefined);
@@ -230,6 +233,28 @@ const updateBusiness = async () => {
     setLoading(false);
   }
 };
+const togglePublished= async()=>{
+  setLoading(true);
+  try{
+    const updatedBusiness = await togglePublishInDB(_id.toString());
+    setBusiness((prevBusiness)=>({
+        ...prevBusiness,
+      published: updatedBusiness.published,
+
+    }));
+    if(updatedBusiness.published){
+      toast.success("Business published successfully")
+    }else{
+      toast.success("Business unpublished successfully")  
+    }
+    toast.success("Publish toggled successfully")
+  }catch(err){
+    console.error(err);
+    toast.error("Failed to toggle publish status")
+} finally{
+  setLoading(false);
+}
+};
 
 return (
   <BusinessContext.Provider
@@ -250,7 +275,8 @@ return (
       isEditPage,
       openDescriptionModal,
       setOpenDescriptionModal,
-      isDashboard
+      isDashboard, 
+      togglePublished,
     }}
   >
     {children}
